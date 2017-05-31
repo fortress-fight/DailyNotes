@@ -1,0 +1,16 @@
+﻿What: 添加了新的文件--5W1H；
+
+Why:
+    * 学习如果添加有意义的 commit message, 更加合理的使用 git 进行项目管理
+
+How：
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	new file:   "2017-05-315W1H-Git Commit Message/5W1H\344\270\216GitCommitMessage.md"
+#
+
