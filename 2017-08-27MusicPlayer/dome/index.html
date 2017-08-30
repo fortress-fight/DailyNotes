@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <audio src="http://ws.stream.qqmusic.qq.com/107506653.m4a?fromtag=46" autoplay controls>
+    </audio>
+    <script>
+        var audio = document.querySelector('audio');
+        console.log(audio);
+        /*
+         * AudioTrack  表示音视频的可用音轨。
+         * 
+         * AudioTrack 对象的属性：
+         * id - 获得音轨的 id
+         * kind - 获得音轨的类型（可以是 "alternative", "description", "main", "translation", "commentary", 或者 "" （空字符串））
+         * label - 获得音轨的标签
+         * language - 获得音轨的语言
+         * enabled - 获得或设置音轨是否是活动的 (true|false)
+         */ 
+        console.log(audio.audioTracks) // undefined -- 返回表示可用于音频轨道的 AudioTrack 对象
+        console.log(audio.autoplay) // true 
+        console.log(audio.buffered) // 表示已经缓冲的部分
+        console.log(audio.controller) // 返回表示音频当前媒体控制器的 MediaController 对象。目前没有浏览器支持
+        console.log(audio.controls) // true
+        console.log(audio.crossOrigin) //	设置或返回音频的 CORS 设置。
+        console.log(audio.currentSrc) // 返回当前音频的 URL。
+        console.log(audio.currentTime) // 设置或返回音频中的当前播放位置（以秒计）
+
+        //只有 Google Chrome 和 Safari 6浏览器 支持 defaultMuted 属性。
+        console.log(audio.defaultMuted) // 	设置或返回音频默认是否静音。
+        console.log(audio.defaultPlaybackRate) // 设置或返回音频的默认播放速度。Safari 浏览器不支持
+        console.log(audio.duration) // 	返回音频的长度（以秒计）。
+        console.log(audio.ended) // 返回音频的播放是否已结束。
+        console.log(audio.error) // 返回表示音频错误状态的 MediaError 对象。 目前只有 Internet Explorer 浏览器支持 error 属性。
+        console.log(audio.loop) // 设置或返回音频是否应在结束时再次播放
+        /**
+         * mediaGroup 属性设置或返回音频/视频所属的媒体组合的名称。媒体分组允许两个或更多音频/视频元素保持同步。
+         * 但是没有实现
+         */
+        console.log(audio.mediaGroup) // 设置或返回音频是否应在结束时再次播放
+        console.log(audio.muted) // 	设置或返回是否关闭声音
+        /*
+        *   0 = NETWORK_EMPTY - 音频/视频尚未初始化
+        *   1 = NETWORK_IDLE - 音频/视频是活动的且已选取资源，但并未使用网络
+        *   2 = NETWORK_LOADING - 浏览器正在下载数据
+        *   3 = NETWORK_NO_SOURCE - 未找到音频/视频来源
+        */ 
+        console.log(audio.networkState) // 返回音频的当前网络状态。
+        console.log(audio.paused) // 设置或返回音频是否暂停。
+        console.log(audio.playbackRate) // 设置或返回音频播放的速度。
+
+        console.log(audio.played) //返回表示音频已播放部分的 TimeRanges 对象。
+        console.log(audio.preload) // 设置或返回音频的 preload 属性的值。
+
+        console.log(audio.readyState) // 返回音频当前的就绪状态。
+        console.log(audio.seekable) // 返回表示音频可寻址部分的 TimeRanges 对象。
+        console.log(audio.seeking) // 返回用户当前是否正在音频中进行查找 拖动进度条时才为真
+
+        console.log(audio.src) // 	设置或返回音频的 src 属性的值。
+
+        console.log(audio.textTracks) // 返回表示可用文本轨道的 TextTrackList 对象。  Firefox 和 Internet Explorer 9 及更早IE版本不支持 textTracks 属性。
+
+        console.log(audio.volume) // 设置或返回音频的音量。从 0.0 (静音) 到 1.0 (最大声)。
+    </script>
+</body>
+
+</html>
+
