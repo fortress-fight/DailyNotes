@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/jquery.js"></script>
+    <script src="./js/mplayer-list.js"></script>
+    <script src="./js/script.js"></script>
+</head>
+<body>
+    <div data-name='一睁眼'>一睁眼</div>
+    <div data-name='不语'>不语</div>
+    <div>播放</div>
+    <div>暂停</div>
+    <div>下一首</div>
+    <div>上一首</div>
+    <script>
+        var mp = new MPlayer();
+        $('div').click(
+            function () {
+                var name = $(this).data('name');
+                console.log(mp.playMusic);
+                mp.tabMusic(mlist[name].src);
+            }
+        )
+    </script>
+</body>
+</html>
