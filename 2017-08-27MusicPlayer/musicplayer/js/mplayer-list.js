@@ -18,7 +18,7 @@
  * lrc为歌词，请用\n或\r将每行歌词隔开，否则无法识别
  */
 
-var mlist = {
+var musicList = {
 	'一睁眼': {
 		"name": "一睁眼",
 		"singer": "沈玮琦",

@@ -54,15 +54,17 @@ MPlayer.prototype = {
                 initVol = this.audioDom.volume,
                 vol = initVol - 0.1,
                 timer,
-                dir = - 0.2;
+                dir = -0.12;
             timer = setInterval(function () {
-                console.log('v'+vol, initVol)
+                // console.log('v' + vol, initVol)
+
+                vol += dir;
                 if (vol >= initVol) {
-                    console.log('end'+initVol)
-                    $this.audioDom.volume = initVol - 0.1;
-                    console.log('end'+$this.audioDom.volume)
+                    // console.log('end' + initVol)
+                    vol = initVol;
+                    // console.log('end' + $this.audioDom.volume)
                     clearInterval(timer);
-                } else if(vol <= 0) {
+                } else if (vol <= 0) {
                     dir = -dir;
                     // // $this.audioDom.volume = vol;
                     // // vol = Math.max(0, vol-0.1);
@@ -74,9 +76,8 @@ MPlayer.prototype = {
 
                     // vol = Math.min(1, vol+0.1);
                     // $this.audioDom.volume = vol;
-                    console.log(initVol);
                 }
-                vol += dir;
+                console.log(vol);
                 $this.audioDom.volume = vol;
             }, 50);
         }

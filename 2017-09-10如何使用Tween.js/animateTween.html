@@ -21,7 +21,7 @@
         var moveEl = document.querySelector('div');
         var t = 0, posx, timer;
         var run = function (){
-            t ++;
+            t += 17;
             posx = Math.tween.Linear(t, 0, 1000, 3000);
             moveEl.style = "transform:translateX("+ posx +"px)"
             if (t >= 3000 ) {
