@@ -1,4 +1,4 @@
-//*    文档头：标出了文件版本 源码地址 作者信息 协议
+//     文档头：标出了文件版本 源码地址 作者信息 协议
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2017 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -9,7 +9,7 @@
 	// Baseline setup
 	// --------------
 
-	// *由于 underscore 是一个工具方法库，所以不能确定它的使用环境，所以在一开始的时候需要确认根对象；
+	// 由于 underscore 是一个工具方法库，所以不能确定它的使用环境，所以在一开始的时候需要确认根对象；
 	// Establish the root object, `window` (`self`) in the browser, `global`
 	// on the server, or `this` in some virtual machines. We use `self`
 	// instead of `window` for `WebWorker` support.
@@ -17,45 +17,45 @@
 		typeof global == 'object' && global.global === global && global ||
 		this || {};
 
-	// *解决命名冲突
+	// 解决命名冲突
 	// !联合具体行为进行解释
 	// Save the previous value of the `_` variable.
 	var previousUnderscore = root._;
 
-	// *使用变量赋值，缓存内置对象的原型对象，便于代码压缩（仅仅是丑化，而不是指 gzip 格式的压缩）
+	// 使用变量赋值，缓存内置对象的原型对象，便于代码压缩（仅仅是丑化，而不是指 gzip 格式的压缩）
 	// Save bytes in the minified (but not gzipped) version:
 	var ArrayProto = Array.prototype,
 		ObjProto = Object.prototype;
 	var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
-	// *缓存一些常用方法，便于直接使用，也可以减少对于原型链的查找次数，提高运行效率
+	// 缓存一些常用方法，便于直接使用，也可以减少对于原型链的查找次数，提高运行效率
 	// Create quick reference variables for speed access to core prototypes.
 	var push = ArrayProto.push,
 		slice = ArrayProto.slice,
 		toString = ObjProto.toString,
 		hasOwnProperty = ObjProto.hasOwnProperty;
 
-	// *所有的 ES5 中存在的原生方法，如果环境对这些方法支持，将会优先使用这些方法；
-	// *implementations -- 安装启用； declared -- 公开宣布（声明）
-	
+	// 所有的 ES5 中存在的原生方法，如果环境对这些方法支持，将会优先使用这些方法；
+	// implementations -- 安装启用； declared -- 公开宣布（声明）
+
 	// All **ECMAScript 5** native function implementations that we hope to use
 	// are declared here.
 	var nativeIsArray = Array.isArray,
 		nativeKeys = Object.keys,
 		nativeCreate = Object.create;
 
-	// ? 一个空对象，用于交换原型使用？？？？？
+	// ? 一个空对象，用于交换原型使用
 	// Naked function reference for surrogate-prototype-swapping.
 	var Ctor = function () {};
 
-	// *声明构造函数 "_"，如果传入的是一个该构造函数的示例，将会直接返回；如果不是就返回一个该构造函数的实例，
+	// 声明构造函数 "_"，如果传入的是一个该构造函数的示例，将会直接返回；如果不是就返回一个该构造函数的实例，
 	// Create a safe reference to the Underscore object for use below.
 	var _ = function (obj) {
-		// *声明构造函数 "_"，如果传入的是一个该构造函数的示例，将会直接返回
+		// 声明构造函数 "_"，如果传入的是一个该构造函数的示例，将会直接返回
 		if (obj instanceof _) return obj;
 		if (!(this instanceof _)) return new _(obj);
-		// *这一步，有些迷惑，this 应该是环境对象，怎么会是在属于 "_" 的原型链上，在这里 打印了 console，然后调用了 _(); 会发现这里执行了两次，所以这里的意思是防止死循环，如果
-		// * 传入的对象是由 _来执行的，那么就说明这里已经完成了实例化（这里是上次循环的this）保留原有对象然后执行结束，不需要再次使用 new 去构造了
+		// 这一步，有些迷惑，this 应该是环境对象，怎么会是在属于 "_" 的原型链上，在这里 打印了 console，然后调用了 _(); 会发现这里执行了两次，所以这里的意思是防止死循环，如果
+		//  传入的对象是由 _来执行的，那么就说明这里已经完成了实例化（这里是上次循环的this）保留原有对象然后执行结束，不需要再次使用 new 去构造了
 		this._wrapped = obj;
 	};
 
@@ -76,9 +76,18 @@
 	// Current version.
 	_.VERSION = '1.8.3';
 
-	// Internal function that returns an efficient (for current engines) version
-	// of the passed-in callback, to be repeatedly applied in other Underscore
-	// functions.
+	// optimize (优化)
+	// Internal function （内部方法） that returns an efficient （有效的） 
+	// (for current engines) version of the passed-in (传入) callback, 
+	// to be repeatedly applied in other Underscore functions.
+
+	/**
+	 * 通过 call 或 apply 修正 this 指向，本方法尽量选择使用 call 处理，因为使用 call 比 apply 更快
+	 * .apply 在运行前要对作为参数的数组进行一系列检验和深拷贝，.call 则没有这些步骤
+	 * @param {* 传入的函数} func 
+	 * @param {* 传入函数需要指正的上下文} context 
+	 * @param {* 参数个数，可以通过函数个数选择返回制定的函数} argCount 
+	 */
 	var optimizeCb = function (func, context, argCount) {
 		if (context === void 0) return func;
 		switch (argCount) {
@@ -86,6 +95,8 @@
 				return function (value) {
 					return func.call(context, value);
 				};
+
+				// 忽略了 2 个参数的情况是因为这里没有使用两个参数的情况；
 				// The 2-parameter case has been omitted only because no current consumers
 				// made use of it.
 			case null:
@@ -103,11 +114,20 @@
 		};
 	};
 
+	// builtin （内置） Iteratee （迭代器）
 	var builtinIteratee;
 
 	// An internal function to generate callbacks that can be applied to each
 	// element in a collection, returning the desired result — either `identity`,
-	// an arbitrary callback, a property matcher, or a property accessor.
+	// an arbitrary callback (任意回调函数), a property matcher (原型对象的匹配器),
+	// or a property accessor (原型对象访问器).
+
+	/**
+	 * /cb -- 一个将传入的变量传递给合适的处理函数
+	 * @param {* 要处理的对象} value 
+	 * @param {* 制定的上下文， 用于处理函数的行为} context 
+	 * @param {* 参数的个数， 用于处理函数的行为} argCount 
+	 */
 	var cb = function (value, context, argCount) {
 		if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
 		if (value == null) return _.identity;
