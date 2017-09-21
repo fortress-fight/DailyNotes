@@ -136,15 +136,24 @@
 		return _.property(value);
 	};
 
-	// External wrapper for our callback generator. Users may customize
+	// External (外部) wrapper for our callback generator. Users may customize (定制的)
 	// `_.iteratee` if they want additional predicate/iteratee shorthand styles.
-	// This abstraction hides the internal-only argCount argument.
+	// This abstraction (抽象 / 提取) hides the internal-only argCount argument.
 	_.iteratee = builtinIteratee = function (value, context) {
 		return cb(value, context, Infinity);
 	};
 
+	// 模拟 ES6 中的 rest 方法 (...)
 	// Similar to ES6's rest param (http://ariya.ofilabs.com/2013/03/es6-and-rest-parameter.html)
-	// This accumulates the arguments passed into an array, after a given index.
+	// This accumulates (积累) the arguments passed into an array, after a given index.
+
+	/**
+	 * 将一个函数包装一下当使用包装后的函数时，在 startIndex 后的参数将会以数组的形式传入，
+	 * 这样就不需要在定义函数的使用决定形参的个数；对 0,1,2 三种情况使用 call 调用，而对于更多
+	 * 的参数使用 apply 调用；
+	 * @param {* 需要包装的函数} func 
+	 * @param {* 决定从第几位开始，将剩余参数转换成数组} startIndex 
+	 */
 	var restArgs = function (func, startIndex) {
 		startIndex = startIndex == null ? func.length - 1 : +startIndex;
 		return function () {
