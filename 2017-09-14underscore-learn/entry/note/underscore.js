@@ -247,54 +247,133 @@
 	// Collection Functions
 	// --------------------
 
-	// The cornerstone (基础), an `each` implementation (实现), aka `forEach`.
+	// The cornerstone (基础), an `each` implementation (实现), aka (名称) `forEach`.
 	// Handles raw objects in addition to array-likes. Treats all
 	// sparse (稀疏的) array-likes as if they were dense (稠密的).
+
+	/**
+	 * 让一个对象具有类数组的循环方式
+	 * 
+	 * 解释：
+	 * 稽核函数（数组或对象）
+	 * - each_.each(list, iteratee, [context]) 别名： forEach 
+	 * 
+	 * 遍历list中的所有元素，按顺序用遍历输出每个元素。如果传递了context参数，
+	 * 则把iteratee绑定到context对象上。每次调用iteratee都会传递三个参数：
+	 * (element, index, list)。如果list是个JavaScript对象，iteratee的参数是 (value, key, list))。返回list以方便链式调用。
+	 * （注：如果存在原生的forEach方法，Underscore就使用它代替。）
+	 * _.each([1, 2, 3], alert);
+	 * => alerts each number in turn...
+	 * _.each({one: 1, two: 2, three: 3}, alert);
+	 * => alerts each number value in turn...
+	 * 注意：集合函数能在数组，对象，和类数组对象，比如arguments, NodeList和类似的数据类型上正常工作。 
+	 * 但是它通过鸭子类型工作，所以要避免传递一个不固定length属性的对象（注：对象或数组的长度（length）属性要固定的）。
+	 * 每个循环不能被破坏 - 打破， 使用_.find代替，这也是很好的注意。
+	 * 
+	 * @param {* 传入的执行对象} obj
+	 * @param {* }
+	 */
 	_.each = _.forEach = function (obj, iteratee, context) {
+
+		// * 使 iteratee 绑定一个上下文 context
 		iteratee = optimizeCb(iteratee, context);
 		var i, length;
+
+		// * 如果具有类数组的特性，就遍历执行，并且传入相应参数
 		if (isArrayLike(obj)) {
 			for (i = 0, length = obj.length; i < length; i++) {
 				iteratee(obj[i], i, obj);
 			}
 		} else {
+
+			// * 如果不是，就获取对象 key，然后通过遍历这个对象的 key，执行函数，并传入相应参数
 			var keys = _.keys(obj);
 			for (i = 0, length = keys.length; i < length; i++) {
 				iteratee(obj[keys[i]], keys[i], obj);
 			}
 		}
+
+		// * 返回对象以便进行链式调用
 		return obj;
 	};
 
 	// Return the results of applying the iteratee to each element.
+
+	/**
+	 * 通过便利器遍历，并将结果组成一个新的数组并返回出来；
+	 * 
+	 * map_.map(list, iteratee, [context]) 别名： collect 
+	 * 通过变换函数（iteratee迭代器）把list中的每个值映射到一个新的数组中（注：产生一个新的数组）。
+	 * 如果存在原生的map方法，就用原生map方法来代替。如果list是个JavaScript对象，iteratee的参数是(value, key, list)。
+	 * 
+	 * _.map([1, 2, 3], function(num){ return num * 3; });
+	 * => [3, 6, 9]
+	 * _.map({one: 1, two: 2, three: 3}, function(num, key){ return num * 3; });
+	 * => [3, 6, 9]
+	 */
+	
 	_.map = _.collect = function (obj, iteratee, context) {
+		// 绑定上下文
 		iteratee = cb(iteratee, context);
+
+		// 如果不是类数组就调用 _.key 获取对象的 key 组成的数组；
 		var keys = !isArrayLike(obj) && _.keys(obj),
 			length = (keys || obj).length,
+			
+			// 创建一个新的数组，用于存放新产生的数组
 			results = Array(length);
+			
 		for (var index = 0; index < length; index++) {
+
+			// 如果使用了 keys 就向遍历函数传入对应的 value 值，否则传入类数组的索引值
 			var currentKey = keys ? keys[index] : index;
+
+			// 存放到 results;
 			results[index] = iteratee(obj[currentKey], currentKey, obj);
 		}
 		return results;
 	};
 
 	// Create a reducing function iterating left or right.
+
+	/**
+	 * 创建一个可以选择方向的递归方法
+	 * @param {number} dir
+	 */
 	var createReduce = function (dir) {
-		// Wrap code that reassigns argument variables in a separate function than
-		// the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+		// Wrap code that reassigns (再分配) argument variables in a separate (独立) function than
+		// the one that accesses `arguments.length` to avoid a perf (跨作用域引入) hit. (#1991)
+		/**
+		 * var sum = _.reduce([1, 2, 3], function(memo, num){ return memo + num; }, 0);
+		 * => 6
+		 * @param {object} obj 
+		 * @param {funtion} iteratee 
+		 * @param {number} memo 
+		 * @param {number} initial 
+		 */
 		var reducer = function (obj, iteratee, memo, initial) {
+
+			// 获取循环体；
 			var keys = !isArrayLike(obj) && _.keys(obj),
 				length = (keys || obj).length,
+				// 如果 dir 大于 0 则循环的其实位置为 0 然后在循环的时候使用递增循环，否则从末尾处开始递减循环；
 				index = dir > 0 ? 0 : length - 1;
+			
+			// 如果第二次调用时传入的参数大于等于 3 （initial 为 true），既是传入了其实起始的数字
+			// 否则起始数字为循环的第一项内容，然后修改起始位置
 			if (!initial) {
 				memo = obj[keys ? keys[index] : index];
 				index += dir;
 			}
+
+			// 如果 index 没有超出对象长度，就以 dir 为间隔进行循环
 			for (; index >= 0 && index < length; index += dir) {
 				var currentKey = keys ? keys[index] : index;
+
+				// 每次的循环函数必须返回该次运行的结果，用于下一次函数执行
 				memo = iteratee(memo, obj[currentKey], currentKey, obj);
 			}
+			// 最终返回最终结果
 			return memo;
 		};
 
@@ -306,9 +385,21 @@
 
 	// **Reduce** builds up a single result from a list of values, aka `inject`,
 	// or `foldl`.
+
+	/**
+	 * 间隔为 1 的正循环，叠加；
+	 * 
+	 * reduce_.reduce(list, iteratee, [memo], [context]) Aliases: inject, foldl 
+	 * 别名为 inject 和 foldl, reduce方法把list中元素归结为一个单独的数值。Memo是reduce函数的初始值，
+	 * reduce的每一步都需要由iteratee返回。这个迭代传递4个参数：memo, value 和 迭代的index（或者 key）和最后一个引用的整个 list。
+	 * 如果没有memo传递给reduce的初始调用，iteratee不会被列表中的第一个元素调用。第一个元素将取代 传递给列表中下一个元素调用iteratee的memo参数，
+	 */
 	_.reduce = _.foldl = _.inject = createReduce(1);
 
 	// The right-associative version of reduce, also known as `foldr`.
+	/**
+	 * 间隔为 1 的倒循环叠加
+	 */
 	_.reduceRight = _.foldr = createReduce(-1);
 
 	// Return the first value which passes a truth test. Aliased as `detect`.

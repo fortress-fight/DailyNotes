@@ -1,3 +1,4 @@
+import _ from './underscore.js';
 
 /**
  * 
@@ -10,7 +11,8 @@ var o = function (obj) {
     if (!(this instanceof o)) return new o(obj);
     this.par = obj;
     this.name = obj.name;
-}
+};
+
 
 o.prototype = {
     sayhay: function () {
