@@ -83,3 +83,29 @@ var restArgs = function (func, startIndex) {
         return func.apply(this, args);
     };
 };
+
+
+var baseCreate = function (prototype) {
+    if (!_.isObject(prototype)) return {};
+    if (nativeCreate) return nativeCreate(prototype);
+    Ctor.prototype = prototype;
+    var result = new Ctor;
+    Ctor.property = null;
+    return result;
+}
+
+var deepGet = function (obj, path) {
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+        if (obj == null) return void 0;
+        obj = obj[path[i]];
+    }
+    return length ? obj : void 0;
+}
+
+var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
+var getLength = shallowProperty('length');
+var isArrayLike = function (collection) {
+    var length = getLength (collection);
+    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+}

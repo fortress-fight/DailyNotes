@@ -156,7 +156,7 @@
     return length ? obj : void 0;
   };
 
-  // Helper for collection methods to determine whether a collection
+  // Helper for collection methods to determine (决定) whether a collection
   // should be iterated as an array or as an object.
   // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
   // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094

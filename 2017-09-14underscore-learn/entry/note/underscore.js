@@ -181,6 +181,11 @@
 	};
 
 	// An internal function for creating a new object that inherits from another.
+
+	/**
+	 * 一个内置函数，创建一个继承其他对象的新的对象，
+	 * @param {* 要被继承的对象} prototype 
+	 */
 	var baseCreate = function (prototype) {
 		if (!_.isObject(prototype)) return {};
 		if (nativeCreate) return nativeCreate(prototype);
@@ -190,12 +195,28 @@
 		return result;
 	};
 
+	/**
+	 * 传入一个位置，返回一个新的函数，在函数中放入一个对象，就输出该对象对于的key 下的 value值
+	 * 如果 value 不存在就返回 undefined 
+	 * 
+	 * @param {* 要取出属性值的key} key 
+	 */ 
 	var shallowProperty = function (key) {
 		return function (obj) {
 			return obj == null ? void 0 : obj[key];
 		};
 	};
 
+	/**
+	 * 从 obj 中 安装 path 数组，进行路径查找，如果其中一个没有找到立即返回一个 undefined
+	 * @param {* 对象} obj 
+	 * @param {* 数组，表示取值路径 } path 
+	 * 
+	 * 例如：
+	 * var obj = {a: {b: 'c'}};
+	 * var path = {'a', 'b'};
+	 * deepGet (obj, path); // 返回 'c'
+	 */
 	var deepGet = function (obj, path) {
 		var length = path.length;
 		for (var i = 0; i < length; i++) {
@@ -205,10 +226,17 @@
 		return length ? obj : void 0;
 	};
 
-	// Helper for collection methods to determine whether a collection
+	// Helper for collection methods to determine (决定) whether (是否) a collection
 	// should be iterated as an array or as an object.
 	// Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
 	// Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
+
+	/**
+	 * 判断是否具有 数组或者对象的 遍历功能
+	 * 如果传入的 collection 具有 length 并且 length 是个数字类型，就表示是一个类数组；
+	 * 
+	 * Math.pow(2, 53) - 1 是 JavaScript 中最大的安全；
+	 */
 	var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 	var getLength = shallowProperty('length');
 	var isArrayLike = function (collection) {
@@ -219,9 +247,9 @@
 	// Collection Functions
 	// --------------------
 
-	// The cornerstone, an `each` implementation, aka `forEach`.
+	// The cornerstone (基础), an `each` implementation (实现), aka `forEach`.
 	// Handles raw objects in addition to array-likes. Treats all
-	// sparse array-likes as if they were dense.
+	// sparse (稀疏的) array-likes as if they were dense (稠密的).
 	_.each = _.forEach = function (obj, iteratee, context) {
 		iteratee = optimizeCb(iteratee, context);
 		var i, length;
