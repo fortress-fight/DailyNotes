@@ -200,7 +200,7 @@
 	 * 如果 value 不存在就返回 undefined 
 	 * 
 	 * @param {* 要取出属性值的key} key 
-	 */ 
+	 */
 	var shallowProperty = function (key) {
 		return function (obj) {
 			return obj == null ? void 0 : obj[key];
@@ -311,7 +311,7 @@
 	 * _.map({one: 1, two: 2, three: 3}, function(num, key){ return num * 3; });
 	 * => [3, 6, 9]
 	 */
-	
+
 	_.map = _.collect = function (obj, iteratee, context) {
 		// 绑定上下文
 		iteratee = cb(iteratee, context);
@@ -319,10 +319,10 @@
 		// 如果不是类数组就调用 _.key 获取对象的 key 组成的数组；
 		var keys = !isArrayLike(obj) && _.keys(obj),
 			length = (keys || obj).length,
-			
+
 			// 创建一个新的数组，用于存放新产生的数组
 			results = Array(length);
-			
+
 		for (var index = 0; index < length; index++) {
 
 			// 如果使用了 keys 就向遍历函数传入对应的 value 值，否则传入类数组的索引值
@@ -358,7 +358,7 @@
 				length = (keys || obj).length,
 				// 如果 dir 大于 0 则循环的其实位置为 0 然后在循环的时候使用递增循环，否则从末尾处开始递减循环；
 				index = dir > 0 ? 0 : length - 1;
-			
+
 			// 如果第二次调用时传入的参数大于等于 3 （initial 为 true），既是传入了其实起始的数字
 			// 否则起始数字为循环的第一项内容，然后修改起始位置
 			if (!initial) {
@@ -402,7 +402,16 @@
 	 */
 	_.reduceRight = _.foldr = createReduce(-1);
 
-	// Return the first value which passes a truth test. Aliased as `detect`.
+	// Return the first value which passes a truth test. Aliased (别名) as `detect`.
+
+	/**
+	 * 返回第一个通过验证的值
+	 * 
+	 * _.findIndex 在下文中出现，返回数组中满足条件的第一个的索引值
+	 * _.findKey 在下文中出现，返回对象中满足条件的一个的 key
+	 * 
+	 * _.find 是上述两个函数的集合，取出第一个 key 并返回对应的 value
+	 */
 	_.find = _.detect = function (obj, predicate, context) {
 		var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
 		var key = keyFinder(obj, predicate, context);
@@ -411,6 +420,10 @@
 
 	// Return all the elements that pass a truth test.
 	// Aliased as `select`.
+
+	/**
+	 * 返回所有满足条件的项
+	 */
 	_.filter = _.select = function (obj, predicate, context) {
 		var results = [];
 		predicate = cb(predicate, context);
@@ -421,12 +434,22 @@
 	};
 
 	// Return all the elements for which a truth test fails.
+
+	/**
+	 * 返回所有不满足条件的项
+	 * 
+	 * _.negate 取反，原先如果返回真就变成假，反之亦然；
+	 */
 	_.reject = function (obj, predicate, context) {
 		return _.filter(obj, _.negate(cb(predicate)), context);
 	};
 
 	// Determine whether all of the elements match a truth test.
 	// Aliased as `all`.
+
+	/**
+	 * 如果都满足则返回真，否则返回假
+	 */
 	_.every = _.all = function (obj, predicate, context) {
 		predicate = cb(predicate, context);
 		var keys = !isArrayLike(obj) && _.keys(obj),
@@ -440,6 +463,10 @@
 
 	// Determine if at least one element in the object matches a truth test.
 	// Aliased as `any`.
+
+	/**
+	 * 如果存在一个满足则返回真，否则返回假
+	 */
 	_.some = _.any = function (obj, predicate, context) {
 		predicate = cb(predicate, context);
 		var keys = !isArrayLike(obj) && _.keys(obj),
@@ -453,13 +480,25 @@
 
 	// Determine if the array or object contains a given item (using `===`).
 	// Aliased as `includes` and `include`.
+
+	/**
+	 * 如果给出的对象中包含 item 就返回 item 在对象中的位置；
+	 */
 	_.contains = _.includes = _.include = function (obj, item, fromIndex, guard) {
 		if (!isArrayLike(obj)) obj = _.values(obj);
 		if (typeof fromIndex != 'number' || guard) fromIndex = 0;
 		return _.indexOf(obj, item, fromIndex) >= 0;
 	};
 
-	// Invoke a method (with arguments) on every item in a collection.
+	// Invoke (引用) a method (with arguments) on every item in a collection.
+
+	/**
+	 * - invoke_.invoke(list, methodName, *arguments) 
+	 * - 在list的每个元素上执行methodName方法。 任何传递给invoke的额外参数，
+	 * - invoke都会在调用methodName方法的时候传递给它。
+	 * _.invoke([[5, 1, 7], [3, 2, 1]], 'sort');
+	 * => [[1, 5, 7], [1, 2, 3]]
+	 */
 	_.invoke = restArgs(function (obj, path, args) {
 		var contextPath, func;
 		if (_.isFunction(path)) {
@@ -482,23 +521,53 @@
 	});
 
 	// Convenience version of a common use case of `map`: fetching a property.
+
+	/**
+	 * pluck 萃取对象数组中某属性值，返回一个数组。
+		var stooges = [{name: 'moe', age: 40}, {name: 'larry', age: 50}, {name: 'curly', age: 60}];
+		_.pluck(stooges, 'name');
+		=> ["moe", "larry", "curly"]
+	 * 
+	 * _.prototype(key) 返回一个函数，如果向这个函数传入一个对象，就会返回这个对象下 key 对应的属性值
+	 */
 	_.pluck = function (obj, key) {
 		return _.map(obj, _.property(key));
 	};
 
-	// Convenience version of a common use case of `filter`: selecting only objects
+	// Convenience (便利) version of a common use case of `filter`: selecting only objects
 	// containing specific `key:value` pairs.
+
+	/**
+	 * filter 的简化版本，
+	 * 
+	 * where_.where(list, properties) 
+	 * 遍历list中的每一个值，返回一个数组，这个数组包含包含properties所列出的属性的所有的键 - 值对。
+	 * 
+	 * matches_.matches(attrs) 
+	 * 返回一个断言函数，这个函数会给你一个断言 可以用来辨别 给定的对象是否匹配attrs指定键/值属性。
+	 * var ready = _.matches({selected: true, visible: true});
+	 * var readyToGoList = _.filter(list, ready);
+	 */
 	_.where = function (obj, attrs) {
 		return _.filter(obj, _.matcher(attrs));
 	};
 
 	// Convenience version of a common use case of `find`: getting the first object
 	// containing specific `key:value` pairs.
+
+	/**
+	 * 返回通过断言的第一个
+	 */
 	_.findWhere = function (obj, attrs) {
 		return _.find(obj, _.matcher(attrs));
 	};
 
 	// Return the maximum element (or element-based computation).
+
+	/**
+	 * 返回对象中的最大项
+	 * 如果传入了 iteratee 就会将其作为每一个值的排序依据
+	 */
 	_.max = function (obj, iteratee, context) {
 		var result = -Infinity,
 			lastComputed = -Infinity,
@@ -525,6 +594,10 @@
 	};
 
 	// Return the minimum element (or element-based computation).
+	
+	/**
+	 * 返回一个对象中的最小项；
+	 */
 	_.min = function (obj, iteratee, context) {
 		var result = Infinity,
 			lastComputed = Infinity,

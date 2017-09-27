@@ -152,6 +152,7 @@
     var length = path.length;
     for (var i = 0; i < length; i++) {
       if (obj == null) return void 0;
+      console.log(obj)
       obj = obj[path[i]];
     }
     return length ? obj : void 0;
@@ -299,6 +300,7 @@
       func = path;
     } else if (_.isArray(path)) {
       contextPath = path.slice(0, -1);
+      console.log(contextPath);
       path = path[path.length - 1];
     }
     return _.map(obj, function(context) {
@@ -306,6 +308,7 @@
       if (!method) {
         if (contextPath && contextPath.length) {
           context = deepGet(context, contextPath);
+          console.log(context);
         }
         if (context == null) return void 0;
         method = context[path];
