@@ -632,6 +632,17 @@
 	// [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
 	// If **n** is not specified, returns a single random element.
 	// The internal `guard` argument allows it to work with `map`.
+
+	/**
+	 * sample_.sample(list, [n]) 
+		从 list中产生一个随机样本。传递一个数字表示从list中返回n个随机元素。否则将返回一个单一的随机项。
+
+		_.sample([1, 2, 3, 4, 5, 6]);
+		=> 4
+
+		_.sample([1, 2, 3, 4, 5, 6], 3);
+		=> [1, 6, 2]
+	 */ 
 	_.sample = function (obj, n, guard) {
 		if (n == null || guard) {
 			if (!isArrayLike(obj)) obj = _.values(obj);
@@ -641,6 +652,8 @@
 		var length = getLength(sample);
 		n = Math.max(Math.min(n, length), 0);
 		var last = length - 1;
+
+		// 将随机出来的项提前，然后保留 n 以前的项，并返回新创建的对象 sample
 		for (var index = 0; index < n; index++) {
 			var rand = _.random(index, last);
 			var temp = sample[index];
@@ -650,7 +663,15 @@
 		return sample.slice(0, n);
 	};
 
-	// Sort the object's values by a criterion produced by an iteratee.
+	// Sort the object's values by a criterion （标准） produced by an iteratee.
+
+	/**
+	 * 首先通过 map 返回一个以多个对象组成的数组，对象中包含 value ，index 以及 执行函数，通过制定的规则将这个数组进行排序，
+	 * 然后利用 pluck 获得排序后的value；完成数组的 sort；
+	 * 
+	 * 为什么要重新制定 sort -- js 中的 sort 返回的是一个地址，如果修改了排序后的数组会影响到排序前的数组；
+	 * 这里可以用于对象，不是对于对象排序；而是根据对象的某个属性值进行判断，并将该属性值排序后组成新的数组并返回
+	 */ 
 	_.sortBy = function (obj, iteratee, context) {
 		var index = 0;
 		iteratee = cb(iteratee, context);
@@ -671,7 +692,18 @@
 		}), 'value');
 	};
 
-	// An internal function used for aggregate "group by" operations.
+	// An internal function used for aggregate (合并) "group by" operations.
+
+	/**
+	 * partition -- 分割
+	 * @param {function} behavior 
+	 * @param {*} partition 
+	 * 
+	 * 目前还没有遇到使用 partition 的情况，暂时不对该情况进行分析
+	 * 
+	 * 这个方法是通过，执行函数 behavior 对对象进行重组，主要行为在于向执行函数放入参数 分割后将存放的对象体 value 和key
+	 * 其中 key 并不是 obj 中的 key 值，而是通过函数的二次调用传入的方法的返回值；
+	 */
 	var group = function (behavior, partition) {
 		return function (obj, iteratee, context) {
 			var result = partition ? [
@@ -689,6 +721,17 @@
 
 	// Groups the object's values by a criterion. Pass either a string attribute
 	// to group by, or a function that returns the criterion.
+
+	/**
+	 * 把一个集合分组为多个集合，通过 iterator 返回的结果进行分组. 如果 iterator 是一个字符串而不是函数, 
+	 * 那么将使用 iterator 作为各元素的属性名来对比进行分组.
+
+		_.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); });
+		=> {1: [1.3], 2: [2.1, 2.4]}
+
+		_.groupBy(['one', 'two', 'three'], 'length');
+		=> {3: ["one", "two"], 5: ["three"]}
+	 */
 	_.groupBy = group(function (result, value, key) {
 		if (_.has(result, key)) result[key].push(value);
 		else result[key] = [value];
@@ -696,6 +739,10 @@
 
 	// Indexes the object's values by a criterion, similar to `groupBy`, but for
 	// when you know that your index values will be unique.
+
+	/**
+	 * 通过给定的 key 对对象进行分组
+	 */
 	_.indexBy = group(function (result, value, key) {
 		result[key] = value;
 	});
@@ -703,6 +750,10 @@
 	// Counts instances of an object that group by a certain criterion. Pass
 	// either a string attribute to count by, or a function that returns the
 	// criterion.
+
+	/**
+	 * 这一个不是将对象进行分组，而是计算以接收到的 key 为分类，value 是该分类下的个数；
+	 */
 	_.countBy = group(function (result, value, key) {
 		if (_.has(result, key)) result[key]++;
 		else result[key] = 1;
@@ -710,6 +761,12 @@
 
 	var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 	// Safely create a real, live array from anything iterable.
+
+	/**
+	 * 如果传入的是字符串，将对其进行分割，返回分割后的数组；
+	 * 如果传入的数组，就直接返回一个新的数组；
+	 * 如果传入的是一个类数组，就通过 map 转成合适的数组形式；
+	 */
 	_.toArray = function (obj) {
 		if (!obj) return [];
 		if (_.isArray(obj)) return slice.call(obj);
@@ -722,6 +779,10 @@
 	};
 
 	// Return the number of elements in an object.
+
+	/**
+	 * 返回 list 的长度；
+	 */
 	_.size = function (obj) {
 		if (obj == null) return 0;
 		return isArrayLike(obj) ? obj.length : _.keys(obj).length;
@@ -729,10 +790,17 @@
 
 	// Split a collection into two arrays: one whose elements all satisfy the given
 	// predicate, and one whose elements all do not satisfy the predicate.
+
+	/**
+	 * 讲一个数组转换成为两个数组，第一个为满足 pass 的，第二个为不满足条件的
+	 */
 	_.partition = group(function (result, value, pass) {
 		result[pass ? 0 : 1].push(value);
 	}, true);
 
+
+
+	
 	// Array Functions
 	// ---------------
 
