@@ -877,25 +877,48 @@
 	// been sorted, you have the option of using a faster algorithm.
 	// Aliased as `unique`.
 	_.uniq = _.unique = function (array, isSorted, iteratee, context) {
+
+		// 如果传入的 isSorted 不是布尔值，将 isSorted 赋值为 false 并且，参数重新定义
 		if (!_.isBoolean(isSorted)) {
 			context = iteratee;
 			iteratee = isSorted;
 			isSorted = false;
 		}
+
+		// 如果传入执行函数，修改 绑定的上下文环境
 		if (iteratee != null) iteratee = cb(iteratee, context);
+
+		//  result 用于储存所有的输出结果
 		var result = [];
+
+		// 
 		var seen = [];
+
+		
+		// 循环 list  
 		for (var i = 0, length = getLength(array); i < length; i++) {
 			var value = array[i],
+				// computed 为执行函数返回的结果，如果执行函数不存在将 value 存入
 				computed = iteratee ? iteratee(value, i, array) : value;
+
+			// 如果 是排序后的, 只需要比较元素和数组前一个;速度会更快;
 			if (isSorted) {
+
+				// i 不为 0 或者 seen 不等于计算后结果，就将 value 存入 记过
 				if (!i || seen !== computed) result.push(value);
 				seen = computed;
+
+				// 如果不是事先得知是排序后的存在计算函数
 			} else if (iteratee) {
+
+				// 如果 seen 中不包含计算结果
 				if (!_.contains(seen, computed)) {
+					// 将计算结果 push 到 seen 中,将 value 保存
 					seen.push(computed);
 					result.push(value);
 				}
+				// 如果不是排序后的并且不包含重新计算的函数式,则只需要通过在数组中判断
+				//  如果结果中不包含 value 就将这个value push 到结果中
 			} else if (!_.contains(result, value)) {
 				result.push(value);
 			}
@@ -905,12 +928,18 @@
 
 	// Produce an array that contains the union: each distinct element from all of
 	// the passed-in arrays.
+
+	// 将数组中的元素集中到一个数组中，并且去重，restArgs 是将再次调用后的参数传入内部函数
 	_.union = restArgs(function (arrays) {
+
+		// 首先使用 flatten 将传入的数组，展开成为一个数组，然后去重；
 		return _.uniq(flatten(arrays, true, true));
 	});
 
 	// Produce an array that contains every item shared between all the
 	// passed-in arrays.
+
+	// 寻找几个数组中共有
 	_.intersection = function (array) {
 		var result = [];
 		var argsLength = arguments.length;
