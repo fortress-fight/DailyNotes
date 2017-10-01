@@ -594,7 +594,7 @@
 	};
 
 	// Return the minimum element (or element-based computation).
-	
+
 	/**
 	 * 返回一个对象中的最小项；
 	 */
@@ -642,7 +642,7 @@
 
 		_.sample([1, 2, 3, 4, 5, 6], 3);
 		=> [1, 6, 2]
-	 */ 
+	 */
 	_.sample = function (obj, n, guard) {
 		if (n == null || guard) {
 			if (!isArrayLike(obj)) obj = _.values(obj);
@@ -671,7 +671,7 @@
 	 * 
 	 * 为什么要重新制定 sort -- js 中的 sort 返回的是一个地址，如果修改了排序后的数组会影响到排序前的数组；
 	 * 这里可以用于对象，不是对于对象排序；而是根据对象的某个属性值进行判断，并将该属性值排序后组成新的数组并返回
-	 */ 
+	 */
 	_.sortBy = function (obj, iteratee, context) {
 		var index = 0;
 		iteratee = cb(iteratee, context);
@@ -800,13 +800,24 @@
 
 
 
-	
+
 	// Array Functions
 	// ---------------
 
 	// Get the first element of an array. Passing **n** will return the first N
 	// values in the array. Aliased as `head` and `take`. The **guard** check
 	// allows it to work with `_.map`.
+
+	/**
+	 * 返回第一项，如果指定 n 就返回从 0 开始的 n 个项组成的数组；
+	 * 
+	 * @param {Array} array -- 数组
+	 * @param {Number} n -- 限制的范围
+	 * 
+	 * 如果数组不存在就直接返回 undefined
+	 * 如果 n 不存在或者 guard 存在 就返回数组中的第一项
+	 * 如果 n 存在就返回从 0 开始的 n 个项组成的数组；
+	 */
 	_.first = _.head = _.take = function (array, n, guard) {
 		if (array == null || array.length < 1) return void 0;
 		if (n == null || guard) return array[0];
@@ -816,12 +827,23 @@
 	// Returns everything but the last entry of the array. Especially useful on
 	// the arguments object. Passing **n** will return all the values in
 	// the array, excluding the last N.
+
+	/**
+	 * @param {Array} array
+	 * @param {number} n
+	 * @param {number} guard
+	 * 如果传入的 n 不存在就返回传入 array 的拷贝数组，如果 n 或者 guard 存在就截取范围内的数组；
+	 */
 	_.initial = function (array, n, guard) {
 		return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
 	};
 
 	// Get the last element of an array. Passing **n** will return the last N
 	// values in the array.
+
+	/**
+	 * 返回最后一项，如果传入了 n 就返回从后向前数 n 项组成的数组；
+	 */
 	_.last = function (array, n, guard) {
 		if (array == null || array.length < 1) return void 0;
 		if (n == null || guard) return array[array.length - 1];
@@ -831,28 +853,57 @@
 	// Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
 	// Especially useful on the arguments object. Passing an **n** will return
 	// the rest N values in the array.
+
+	/**
+	 * @param {Array} array
+	 * @param {number} n
+	 * @param {number} guard
+	 * 如果传入的 n 不存在就返回传入 array 的拷贝数组，如果 n 或者 guard 存在就截取范围内的数组；
+	 */
 	_.rest = _.tail = _.drop = function (array, n, guard) {
 		return slice.call(array, n == null || guard ? 1 : n);
 	};
 
 	// Trim out all falsy values from an array.
+
+	/**
+	 * 去除数组中所有的假项
+	 * Boolean() 将传入的项转化成为布尔值后返回；
+	 */
 	_.compact = function (array) {
 		return _.filter(array, Boolean);
 	};
 
 	// Internal implementation of a recursive `flatten` function.
+
+	/**
+	 * 内部实现递归的方法
+	 * 将一个嵌套多层的数组 array（数组） (嵌套可以是任何层数)转换为只有一层的数组。 如果你传递 shallow参数，数组将只减少一维的嵌套。
+	 * _.flatten([1, [2], [3, [[4]]]]);
+	 * => [1, 2, 3, 4];
+	 * @param {*} input 
+	 * @param {*} shallow 
+	 * @param {*} strict 
+	 * @param {*} output 
+	 */
 	var flatten = function (input, shallow, strict, output) {
 		output = output || [];
 		var idx = output.length;
 		for (var i = 0, length = getLength(input); i < length; i++) {
+			// 去除输入项中的第一个
 			var value = input[i];
+			
 			if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
 				// Flatten current level of array or arguments object.
+				// 如果子项是类数组，并且 这一项 是数组或者是 arguments
 				if (shallow) {
+					// 如果是浅复制，将这一组数据拷贝到新的数组中
 					var j = 0,
 						len = value.length;
 					while (j < len) output[idx++] = value[j++];
 				} else {
+
+					// 如果是深度，就将数组再次循环
 					flatten(value, shallow, strict, output);
 					idx = output.length;
 				}
