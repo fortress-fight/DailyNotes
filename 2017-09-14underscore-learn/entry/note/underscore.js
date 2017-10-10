@@ -218,7 +218,9 @@
 	var baseCreate = function (prototype) {
 		// 如果传入的是一个非对象，就直接返回一个新的对象；
 		if (!_.isObject(prototype)) return {};
+		// 如果具有原生的创建对象的方法就直接调用并且直接返回
 		if (nativeCreate) return nativeCreate(prototype);
+		// 
 		Ctor.prototype = prototype;
 		var result = new Ctor;
 		Ctor.prototype = null;
