@@ -1,111 +1,105 @@
-// optimize (优化)
-// Internal function （内部方法） that returns an efficient （有效的） 
-// (for current engines) version of the passed-in (传入) callback, 
-// to be repeatedly applied in other Underscore functions.
+(function () {
 
-/**
- * 通过 call 或 apply 修正 this 指向，本方法尽量选择使用 call 处理，因为使用 call 比 apply 更快
- * @param {* 传入的函数} func 
- * @param {* 传入函数需要指正的上下文} context 
- * @param {* 参数个数，可以通过函数个数选择返回制定的函数} argCount 
- */
+    var root = typeof self == 'object' && self.self === self && self ||
+        typeof global == 'object' && global.global === global && global ||
+        this || {};
 
-var optimizeCb = function (func, context, argCount) {
-    if (context === void 0) return func;
+    var previousUnderScore = root._;
 
-    switch (argCount) {
-        case 1:
-            return function (value) {
-                return func.call(context, value);
-            };
+    var ArrayProto = Array.prototype,
+        ObjProto = Object.prototype;
+    
+    var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
-        case null:
-        case 3:
-            return function (value, index, collection) {
-                return func.call(context, value, index);
-            };
-        case 4:
-            return function (accumulator, value, index, collection) {
-                return func.call(context, accumulator, value, index, collection);
-            };
-    }
-    return function () {
-        return func.apply(context, arguments);
-    }
-}
+    var push = ArrayProto.push,
+        slice = ArrayProto.slice,
+        toString = ObjProto.toString,
+        hasOwnProperty = ObjProto.hasOwnProperty;
 
-// builtin （内置） Iteratee （迭代器）
-var builtinIteratee;
+    var nativeIsArray = Array.isArray,
+        nativeKeys = Object.keys,
+        nativeCreate = Object.create;
 
-// An internal function to generate callbacks that can be applied to each
-// element in a collection, returning the desired result — either `identity`,
-// an arbitrary callback (任意回调函数), a property matcher (原型对象的匹配器),
-// or a property accessor (原型对象访问器).
+    var Ctor = function () {};
 
-/**
- * /cb -- 一个将传入的变量传递给合适的处理函数
- * @param {* 要处理的对象} value 
- * @param {* 制定的上下文， 用于处理函数的行为} context 
- * @param {* 参数的个数， 用于处理函数的行为} argCount 
- */
-var cb = function (value, context, argCount) {
-
-    if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
-    if (value == null) return _.identity;
-    if (_.isfunction(value)) return optimizeCb(value, context, argCount);
-    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
-    return _.property(value)
-}
-
-var restArgs = function (func, startIndex) {
-    startIndex = startIndex == null ? func.length - 1 : +startIndex;
-    return function () {
-        var length = Math.max(arguments.length - startIndex, 0),
-            rest = Array(length),
-            index = 0;
-
-        for (; index < length; index ++) {
-            rest[index] = arguments[index + startIndex];
-        }
-
-        switch (startIndex) {
-            case 0: return func.call(this, rest);
-            case 1: return func.call(this, arguments[0], rest);
-            case 2: return func.call(this, arguments[0], arguments[1], rest);
-        }
-
-        var args = Array(startIndex + 1);
-        for(index = 0; index < startIndex; index ++) {
-            args[index] = arguments[index];
-        }
-
-        args[startIndex] = rest;
-        return func.apply(this, args);
+    var _ = function (obj) {
+        if (obj instanceof _) return obj;
+        if (!(this instanceof _)) return new _(obj);
+        this._wrapped = obj;
     };
-};
 
-
-var baseCreate = function (prototype) {
-    if (!_.isObject(prototype)) return {};
-    if (nativeCreate) return nativeCreate(prototype);
-    Ctor.prototype = prototype;
-    var result = new Ctor;
-    Ctor.property = null;
-    return result;
-}
-
-var deepGet = function (obj, path) {
-    var length = path.length;
-    for (var i = 0; i < length; i++) {
-        if (obj == null) return void 0;
-        obj = obj[path[i]];
+    if (typeof exports != 'undefined' && !exports.nodeType) {
+        if (typeof module != 'undefined' && !module.nodeType && module.exports) {
+            exports = module.exports = _;
+        }
+        exports._ = _;
+    } else {
+        root._ = _;
     }
-    return length ? obj : void 0;
-}
 
-var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-var getLength = shallowProperty('length');
-var isArrayLike = function (collection) {
-    var length = getLength (collection);
-    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
-}
+    _.VERSION = '1.8.3';
+
+    var optimizeCb = function (func, context, argCount) {
+        if (context === void 0) return func;
+        switch (argCount) {
+            case 1:
+                return function (value) {
+                    return func.call(context.value);
+                };
+            
+            case null:
+            case 3: 
+                return function (value, index, collection) {
+                    return func.call(context, value);
+                };
+            case 4:
+                return function (accumulator, value, index, collection) {
+                    return func.call(context, accumulator, value, index, collection)
+                }
+        }
+        return function () {
+            return func.apply(context, arguments);
+        }
+    }
+
+    var builtinIteratee;
+
+    var cb = function (value, context, argCount) {
+        if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
+        if (value == null) return _.identity;
+        if (_isFunction(value)) return optimizeCb(value, context, argCount);
+        if (_isObject(value) && !_.isArray(value)) return _.matcher(value);
+        return _.prototype(value);
+    };
+
+    _.iteratee = builtinIteratee = function (value, context) {
+        return cb(value, context, Infinity);
+    };
+
+    var restArgs = function (func, startIndex) {
+        startIndex = startIndex == null ? func.length -1 : +startIndex;
+        return function () {
+            var length = Math.max(arguments.length - startIndex, 0),
+                rest = Array(length),
+                index = 0;
+            
+            for (; index < length; index ++) {
+                rest[index] = arguments[index + startIndex];
+            }
+            switch (startIndex) {
+                case 0: 
+                    return func.call(this, rest);
+                case 1: 
+                    return func.call(this, arguments[0], rest);
+                case 2:
+                    return func.call(this, arguments[0], arguments[1], rest);
+            }
+            var args = Array(startIndex + 1);
+            for (index = 0; index < startIndex; index++) {
+                args[index] = arguments[index];
+            }
+            args[startIndex] = rest;
+            return func.apply(this, args);
+        }
+    }
+})
