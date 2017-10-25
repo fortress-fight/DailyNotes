@@ -214,6 +214,8 @@
 	/**
 	 * 一个内置函数，创建一个继承其他对象的新的对象，
 	 * @param {* 要被继承的对象} prototype 
+	 * 创建一个建议的 object.create 只实现将传入的对象放在一个新的对象上然后将
+	 * 新的对象返回
 	 */
 	var baseCreate = function (prototype) {
 		// 如果传入的是一个非对象，就直接返回一个新的对象；
@@ -222,13 +224,14 @@
 		if (nativeCreate) return nativeCreate(prototype);
 		// 
 		Ctor.prototype = prototype;
-		var result = new Ctor;
+		var result = new Ctor();
 		Ctor.prototype = null;
 		return result;
 	};
 
 	/**
-	 * 传入一个位置，返回一个新的函数，在函数中放入一个对象，就输出该对象对于的key 下的 value值
+	 * 传入一个位置，返回一个新的函数，
+	 * 在新的函数中放入一个对象，就输出该对象对于的key 下的 value值
 	 * 如果 value 不存在就返回 undefined 
 	 * 
 	 * @param {* 要取出属性值的key} key 
@@ -252,7 +255,7 @@
 	var deepGet = function (obj, path) {
 		var length = path.length;
 		for (var i = 0; i < length; i++) {
-			if (obj == null) return void 0;
+			if (obj === null) return void 0;
 			obj = obj[path[i]];
 		}
 		return length ? obj : void 0;
@@ -273,7 +276,8 @@
 	var getLength = shallowProperty('length');
 	var isArrayLike = function (collection) {
 		var length = getLength(collection);
-		return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+		return typeof length == 'number' && length >= 0 &&
+					length <= MAX_ARRAY_INDEX;
 	};
 
 	// Collection Functions
@@ -304,10 +308,13 @@
 	 * 
 	 * @param {* 传入的执行对象} obj
 	 * @param {* }
+	 * 
+	 * _.key 用于获取传入对象的所有属性名，并且以数组的方式返回
 	 */
 	_.each = _.forEach = function (obj, iteratee, context) {
 
-		// * 使 iteratee 绑定一个上下文 context
+		// * 使 iteratee 绑定一个上下文 context，没有传入第三个参数，会当做 3 处理；
+		// * 返回的函数希望接受的是，值-索引-和原有对象；
 		iteratee = optimizeCb(iteratee, context);
 		var i, length;
 
@@ -410,6 +417,7 @@
 		};
 
 		return function (obj, iteratee, memo, context) {
+			// 如果传入的参数超出 3 个，循环的起始位置将会加上 dir
 			var initial = arguments.length >= 3;
 			return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
 		};
@@ -685,7 +693,7 @@
 		n = Math.max(Math.min(n, length), 0);
 		var last = length - 1;
 
-		// 将随机出来的项提前，然后保留 n 以前的项，并返回新创建的对象 sample
+		// 将随机出来的项提前，然后存放在 n 以前的项，并返回 经常重新排序后新创建的对象 sample
 		for (var index = 0; index < n; index++) {
 			var rand = _.random(index, last);
 			var temp = sample[index];
