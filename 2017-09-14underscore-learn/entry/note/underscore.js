@@ -9,7 +9,8 @@
 	// Baseline setup
 	// --------------
 
-	// 由于 underscore 是一个工具方法库，所以不能确定它的使用环境，所以在一开始的时候需要确认根对象；
+	// 由于 underscore 是一个工具方法库，所以不能确定它的使用环境
+	// 所以在一开始的时候需要确认根对象；
 	// Establish the root object, `window` (`self`) in the browser, `global`
 	// on the server, or `this` in some virtual machines. We use `self`
 	// instead of `window` for `WebWorker` support.
@@ -26,6 +27,8 @@
 	// Save bytes in the minified (but not gzipped) version:
 	var ArrayProto = Array.prototype,
 		ObjProto = Object.prototype;
+	
+	// 在具有 Symbol 内置对象的浏览器中 typeof Symbol === 'function'
 	var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
 	// 缓存一些常用方法，便于直接使用，也可以减少对于原型链的查找次数，提高运行效率
@@ -99,6 +102,8 @@
 				// 忽略了 2 个参数的情况是因为这里没有使用两个参数的情况；
 				// The 2-parameter case has been omitted only because no current consumers
 				// made use of it.
+
+				// 如果argCount 为 null 或者没有传递 argCount 参数， 则将其视作 3 个进行处理；
 			case null:
 			case 3:
 				return function (value, index, collection) {
@@ -123,22 +128,42 @@
 	// or a property accessor (原型对象访问器).
 
 	/**
-	 * /cb -- 一个将传入的变量传递给合适的处理函数
+	 * /cb -- 根据传入 value 的不同值，选择返回不同的迭代器；
 	 * @param {* 要处理的对象} value 
 	 * @param {* 制定的上下文， 用于处理函数的行为} context 
 	 * @param {* 参数的个数， 用于处理函数的行为} argCount 
+	 * 
+	 * _.iteratee 已经说明
+	 * _.identity 返回和已经传入参数相等的值，相当于数学中的 f(x) = x; 在 underscore 中
+	 * 		常常作为默认的迭代器；
 	 */
 	var cb = function (value, context, argCount) {
+
+		// 如果使用 _.iteratee 并非是内置的迭代器，将直接选择使用并返回处理结果
 		if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
+		
+		// 如果传入 value 为一个空值，将会返回一个函数，当再次调用的时候将会把参数直接返回
 		if (value == null) return _.identity;
 		if (_.isFunction(value)) return optimizeCb(value, context, argCount);
+		
+		// 如果传入的是一个对象，但不是数组 将会返回一个布尔值
+		// matcher 和 _.matches 相同； 调用后将会返回一个断言，这个函数会给你一个值
+		// 用来辨别给定的对象中是否包含匹配传入参数的值或者属性；
 		if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
+		
+		// _.property 返回一个函数，这个函数返回任何传入的对象的key 属性。
+		// 就是先传入要读取的 key，然后再再次调用的时候传入要读的对象，将会返回对象下该key对应的value；
 		return _.property(value);
 	};
 
 	// External (外部) wrapper for our callback generator. Users may customize (定制的)
 	// `_.iteratee` if they want additional predicate/iteratee shorthand styles.
 	// This abstraction (抽象 / 提取) hides the internal-only argCount argument.
+
+	/**
+	 * 一个重要的内部函数__用来生成__可应用到集合中每个元素的回调， 
+	 * 从而返回想要的结果 - 无论是等式，任意回调，属性匹配，或属性访问。 
+	 */
 	_.iteratee = builtinIteratee = function (value, context) {
 		return cb(value, context, Infinity);
 	};
@@ -171,6 +196,10 @@
 				case 2:
 					return func.call(this, arguments[0], arguments[1], rest);
 			}
+
+			// 这里的 startIndex 限制了不会超过两个，
+			// 如果超出了两个将会调用 apply 来实现，将没有超出的放到数组中，将超出的（已经是数组了）
+			// 放在最后一位；
 			var args = Array(startIndex + 1);
 			for (index = 0; index < startIndex; index++) {
 				args[index] = arguments[index];
@@ -185,18 +214,24 @@
 	/**
 	 * 一个内置函数，创建一个继承其他对象的新的对象，
 	 * @param {* 要被继承的对象} prototype 
+	 * 创建一个建议的 object.create 只实现将传入的对象放在一个新的对象上然后将
+	 * 新的对象返回
 	 */
 	var baseCreate = function (prototype) {
+		// 如果传入的是一个非对象，就直接返回一个新的对象；
 		if (!_.isObject(prototype)) return {};
+		// 如果具有原生的创建对象的方法就直接调用并且直接返回
 		if (nativeCreate) return nativeCreate(prototype);
+		// 
 		Ctor.prototype = prototype;
-		var result = new Ctor;
+		var result = new Ctor();
 		Ctor.prototype = null;
 		return result;
 	};
 
 	/**
-	 * 传入一个位置，返回一个新的函数，在函数中放入一个对象，就输出该对象对于的key 下的 value值
+	 * 传入一个位置，返回一个新的函数，
+	 * 在新的函数中放入一个对象，就输出该对象对于的key 下的 value值
 	 * 如果 value 不存在就返回 undefined 
 	 * 
 	 * @param {* 要取出属性值的key} key 
@@ -220,7 +255,7 @@
 	var deepGet = function (obj, path) {
 		var length = path.length;
 		for (var i = 0; i < length; i++) {
-			if (obj == null) return void 0;
+			if (obj === null) return void 0;
 			obj = obj[path[i]];
 		}
 		return length ? obj : void 0;
@@ -241,7 +276,8 @@
 	var getLength = shallowProperty('length');
 	var isArrayLike = function (collection) {
 		var length = getLength(collection);
-		return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+		return typeof length == 'number' && length >= 0 &&
+					length <= MAX_ARRAY_INDEX;
 	};
 
 	// Collection Functions
@@ -272,10 +308,13 @@
 	 * 
 	 * @param {* 传入的执行对象} obj
 	 * @param {* }
+	 * 
+	 * _.key 用于获取传入对象的所有属性名，并且以数组的方式返回
 	 */
 	_.each = _.forEach = function (obj, iteratee, context) {
 
-		// * 使 iteratee 绑定一个上下文 context
+		// * 使 iteratee 绑定一个上下文 context，没有传入第三个参数，会当做 3 处理；
+		// * 返回的函数希望接受的是，值-索引-和原有对象；
 		iteratee = optimizeCb(iteratee, context);
 		var i, length;
 
@@ -378,6 +417,7 @@
 		};
 
 		return function (obj, iteratee, memo, context) {
+			// 如果传入的参数超出 3 个，循环的起始位置将会加上 dir
 			var initial = arguments.length >= 3;
 			return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
 		};
@@ -653,7 +693,7 @@
 		n = Math.max(Math.min(n, length), 0);
 		var last = length - 1;
 
-		// 将随机出来的项提前，然后保留 n 以前的项，并返回新创建的对象 sample
+		// 将随机出来的项提前，然后存放在 n 以前的项，并返回 经常重新排序后新创建的对象 sample
 		for (var index = 0; index < n; index++) {
 			var rand = _.random(index, last);
 			var temp = sample[index];
