@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>A Simple Page with CKEditor</title>
+        <!-- Make sure the path to CKEditor is correct. -->
+        <script src="./ckeditor/ckeditor.js"></script>
+    </head>
+    <body>
+        <form>
+            <textarea name="editor1" id="editor1" rows="10" cols="80">
+                This is my textarea to be replaced with CKEditor.
+            </textarea>
+            <script>
+                // Replace the <textarea id="editor1"> with a CKEditor
+                // instance, using default configuration.
+                var editor = CKEDITOR.inline( 'editor1' );
+                editor.on('change', function (evt) {
+                    console.log(evt);
+                    // 获取到所有的内容
+                    console.log(evt.editor.getData())
+                    // 获取编辑器中所有的信息
+                    console.log(CKEDITOR.instances.editor1.getData())
+                })
+            </script>
+        </form>
+    </body>
+</html>
